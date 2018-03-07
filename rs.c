@@ -239,6 +239,15 @@ int gf_add(int index1,int index2)
 		exit(-1);
 	}
 
+	if(index1==-1)
+	{
+		return index2;
+	}
+	else if(index2==-1)
+	{
+		return index1;
+	}
+
 	index1=index1%n;
 	index2=index2%n;
 	
@@ -397,7 +406,7 @@ int rs_decode(int *r,int *out)
 	//由Berlekamp-Massey Algorithm求错误位置多项式
 	//《RS纠错编码原理及其实现方法》
 	//初始化
-	int Lambda[34][33]={0};
+	int Lambda[34][33]={0};//alpha
 	Lambda[0][0]=1;
 	Lambda[1][0]=1;
 	int D[34]={0,0};//D为Lambda的阶次
@@ -460,7 +469,7 @@ int rs_decode(int *r,int *out)
 	//chien搜索法，求错误多项式的根即错误位置
 	int count=0;
 	int error[16];
-	for(int i=1;i<n+1;i++)
+	for(int i=n;i>0;i--)
 	{
 		int result=-1;
 		for(int j=0;j<33;j++)
@@ -469,31 +478,30 @@ int rs_decode(int *r,int *out)
 		}
 		if(result==-1)
 		{
-			printf("%d\n",n-i);
 			if(count==16)
 			{
 				printf("错误太多超出纠错能力\n");
 				exit(-1);
 			}
 			error[count]=n-i;//错误位置
+			printf("%d\n",error[count]);
 			count++;
 		}
 	}
 
 	//Forney算法计算错误图样
-	int Omega[32];
-	//Lambda(x)*s(x)(mod x^32)
+	int Omega[32];//index
 	for(int i=0;i<32;i++)
 	{
 		Omega[i]=-1;
 	}
-	
+	//Lambda(x)*s(x)(mod x^32)
 	for(int i=0;i<32;i++)
 	{
 		for(int j=0;j<i+1;j++)
 		{
 			Omega[i]=gf_add(Omega[i],gf_mul(index_of(Lambda[33][j]),s[i-j]));
-		}
+		}//Omega为升序
 	}
 
 	int *e;
@@ -520,7 +528,7 @@ int rs_decode(int *r,int *out)
 	}
 	for(int i=0;i<count;i++)
 	{
-		out[error[i]]=index_of(gf_add(index_of(out[error[i]]),e[i]));
+		out[error[i]]=alpha_of(gf_add(index_of(out[error[i]]),e[i]));
 	}
 
 	free(e);
