@@ -79,8 +79,8 @@ int main()
 	// printf("\n");
 
 	//加入误差
-	rs_out[8]=2;
-	rs_out[16]=2;
+	rs_out[3]=2;
+	rs_out[6]=2;
 
 	//RS译码
 	int *rs_decode_out;
@@ -501,7 +501,7 @@ int rs_decode(int *r,int *out)
 		for(int j=0;j<i+1;j++)
 		{
 			Omega[i]=gf_add(Omega[i],gf_mul(index_of(Lambda[33][j]),s[i-j]));
-		}//Omega为升序
+		}
 	}
 
 	int *e;
@@ -510,10 +510,11 @@ int rs_decode(int *r,int *out)
 	for(int i=0;i<count;i++)
 	{
 		int e_u=-1,e_d=-1;//错误值计算公式的分子分母，初始化为index=-1
-		for(int j=0;j<32;j++)
+		for(int j=0;j<count;j++)
 		{
 			e_u=gf_add(e_u,gf_mul(Omega[j],(n-error[i])*j));
 		}
+		e_u=gf_mul(e_u,error[i]*144);
 		for(int j=1;j<=count;j+=2)
 		{
 			e_d=gf_add(e_d,gf_mul(index_of(Lambda[33][j]),(n-error[i])*(j-1)));
